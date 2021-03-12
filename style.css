@@ -5,9 +5,17 @@
 
 }
 
+html {
+    height: 100%;
+}
+
 body{
+    height: 100%;
+    width: 100%;
     font-family: 'Roboto', sans-serif;
     background-image: linear-gradient(to bottom right, #2bc0e4, #eaecc6);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     /* background-color: #F0FFFF; */
 }
 
@@ -33,6 +41,10 @@ body{
 .table-title h1 {
     margin: 2px 0 0;
     font-size: 24px;
+}
+
+table{
+    table-layout: fixed;
 }
 
 table tbody{
@@ -77,6 +89,7 @@ table.table td a {
   transition: all 0.3s ease 0s;
   cursor: pointer;
   outline: none;
+  margin: 0 1px;
 }
 
 .btn:hover {
@@ -118,3 +131,21 @@ table.table td a {
     display: none;
 }
 
+i{
+    font-size: 1.5rem;
+    /* text-align: center; */
+}
+
+th[data-filter='true']{
+    color:blue
+}
+th[data-filter='false']{
+    color: black;
+}
+
+td input{
+    display: block;
+    width: 100%;
+    border:none;
+    background-color: transparent;
+}

@@ -1,9 +1,10 @@
 const table = document.querySelector('tbody');
-const toolbar = document.querySelector('toolbar');
+
 
 const state = {
-    currentFilter: 'none',
-    currentSearchMode: 'id'
+    currentFilter: 'id',
+    currentSearchMode: 'id',
+    tableRows: new Map(),
 }
 
 class APIHandler {
@@ -100,6 +101,12 @@ UserCRUD.prototype = {
             this.searchUserById(argsmap.id).assign(argsmap);
         }
         else throw new Error(`user id ${argsmap.id} does not exist`);
+    },
+
+    deleteUser(userId){
+        if(this.users.has(userId))
+        this.users.delete(userId);
+        else throw new Error(`user with id ${userId} doesn't exist`);
     }
 
 
@@ -107,32 +114,90 @@ UserCRUD.prototype = {
 
 const usersCrud = new UserCRUD();
 
+const btnClicked = (event) =>
+{
+    const btn = event.target;
+    const userId = parseInt(btn.getAttribute('data-user-id'));
+    const tr = state.tableRows.get(userId);
+    let toDelete;
+    let toDisplay;
+    switch(btn.getAttribute('data-btn-type')){
+        case 'delete':
+            state.tableRows.get(userId).remove();
+            state.tableRows.delete(userId);
+            usersCrud.deleteUser(userId);
+            break;
+        case 'edit':
+            
+
+            const createInput = (td,content, type) =>{
+                const input = document.createElement('input');
+                input.setAttribute('type','text');
+                input.value = content;
+                input.setAttribute('data-input-column',type)
+                input.style.pointerEvents= 'none';
+                td.innerHTML = '';
+                td.appendChild(input);
+            }
+
+            const tds = Array.from(tr.querySelectorAll('td[data-column-type]'));
+            tds.forEach((td) => createInput(td,td.innerHTML,td.getAttribute('data-column-type')))
+            toDelete = Array.from(tr.querySelectorAll(`.btn[data-active='true']`)); 
+            toDisplay = Array.from(tr.querySelectorAll(`.btn[data-active='false']`)); 
+            toDelete.forEach((btn) => btn.setAttribute('data-active','false'));
+            toDisplay.forEach((btn) => btn.setAttribute('data-active','true'));
+            // Array.from(tds.querySelectorAll(`.btn[data-active='false']`)).setAttribute('data-active','true');
+            break;
+        case 'cancel':
+            toDelete = Array.from(tr.querySelectorAll(`.btn[data-active='true']`)); 
+            toDisplay = Array.from(tr.querySelectorAll(`.btn[data-active='false']`)); 
+            toDelete.forEach((btn) => btn.setAttribute('data-active','false'));
+            toDisplay.forEach((btn) => btn.setAttribute('data-active','true'));
+            const tds1 = Array.from(tr.querySelectorAll('td[data-column-type]'));
+            
+    }
+}
 
 const createTableRow = (user) => {
     const tr = document.createElement('tr');
+    const buttonsTd = document.createElement('td');
+    const createTd = (content, type) =>{
+        const td = document.createElement('td');
+        td.innerHTML = content;
+        td.setAttribute('data-column-type',type);
+        tr.appendChild(td);
+    }
 
-    const tdId = `<td>${user.id}</td>\n`;
-    const tdFirstName = `<td>${user.firstName}</td>\n`;
-    const tdLastName = `<td>${user.lastName}</td>\n`;
-    const tdCapsule = `<td>${user.capsule}</td>\n`;
-    const tdAge = `<td>${user.age}</td>\n`;
-    const tdCity = `<td>${user.city}</td>\n`;
-    const tdGender = `<td><i class="fas fa-${user.gender === 'Female' ? 'female' : 'male'}"></i></td>\n`;
-    const tdHobby = `<td>${user.hobby}</td>\n`;
+    const createButton = (btnType, isActive) =>{
+        const btn = document.createElement('button');
+        btn.innerHTML = btnType;
+        btn.classList.add('btn');
+        btn.setAttribute('data-btn-type',btnType);
+        btn.setAttribute('data-active',isActive);
+        btn.setAttribute('data-user-id',user.id);
+        btn.addEventListener('click',btnClicked);
+        buttonsTd.appendChild(btn);
+    }
+    createTd(user.id,'id');
+    createTd(user.firstName,'firstName');
+    createTd(user.lastName,'lastName');
+    createTd(user.capsule,'capsule');
+    createTd(user.age,'age');
+    createTd(user.city,'city');
+    createTd(`<i class="fas fa-${user.gender === 'Female' ? 'female' : 'male'}"></i>`,'gender');
+    createTd(user.hobby,'hobby');
+    
+    createButton('edit','true');
+    createButton('delete','true');
+    createButton('cancel','false');
+    createButton('confirm','false');
 
-    const buttonEdit = `<button class='btn' data-btn-type='edit' data-active='true'>Edit</button>\n`
-    const buttonDelete = `<button class='btn' data-btn-type='delete' data-active='true'>Delete</button>\n`
-    const buttonCancel = `<button class='btn' data-btn-type='cancel' data-active='false'>Cancel</button>\n`
-    const buttonConfirm = `<button class='btn' data-btn-type='confirm' data-active='false'>Confirm</button>\n`
-    const tdButtons = `<td>\n ${buttonEdit}${buttonDelete}${buttonCancel}${buttonConfirm}</td>\n`;
-    const htmlTableRow = tdId + tdFirstName + tdLastName + tdCapsule + tdAge + tdCity + tdGender + tdHobby + tdButtons;
-    tr.innerHTML = htmlTableRow;
-
+    tr.appendChild(buttonsTd);
+    state.tableRows.set(user.id,tr);
     return tr;
 }
 
 const addUsersToTable = (usersToDisplay) => {
-    // const usersInOrder = usersCrud.sortUsers('lastName');
     table.innerHTML = '';
     usersToDisplay.forEach((user) => {
         const tr = createTableRow(user);
@@ -154,8 +219,19 @@ const init = async () => {
 
     document.querySelector('#search-input').addEventListener('input',(event)=>{
         console.log(usersCrud.search(state.currentSearchMode, event.target.value));
+        if(!event.target.value) addUsersToTable(usersCrud.sortUsers(state.currentFilter));
         addUsersToTable(usersCrud.search(state.currentSearchMode, event.target.value));
     });
+
+    const tableHeaders = Array.from(document.querySelectorAll('th[data-column]'));
+    tableHeaders.forEach((header) =>{
+        header.addEventListener('click', (event) =>{
+            state.currentFilter = event.target.getAttribute('data-column')
+            addUsersToTable(usersCrud.sortUsers(state.currentFilter));
+            tableHeaders.forEach((h) => h.setAttribute('data-filter','false'));
+            event.target.setAttribute('data-filter','true');
+        })
+    })
 }
 
 init();
