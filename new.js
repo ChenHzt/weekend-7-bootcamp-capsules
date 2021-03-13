@@ -11,6 +11,7 @@ class APIHandler {
     constructor(apiAdress) {
         this.apiAdress = apiAdress;
         this.isLoading = false;
+        this.spinner = document.querySelector(".spinner");
     }
 
     async getDataFromApi(userid = '') {
@@ -27,11 +28,17 @@ class APIHandler {
     startLoading() {
         this.isLoading = true;
         //TODO:show spinner
+        this.spinner.classList.remove("display--hide");
+        table.parentElement.classList.add('display--hide');
+
     }
 
     endLoading() {
         this.isLoading = false;
         //TODO:hide spinner
+        this.spinner.classList.add("display--hide");
+        table.parentElement.classList.remove('display--hide');
+
     }
 }
 
@@ -42,7 +49,7 @@ function User(argsmap) {
     this.firstName = argsmap.firstName;
     this.lastName = argsmap.lastName;
     this.capsule = argsmap.capsule;
-    this.getUserInfoData()
+
 }
 
 User.prototype = {
@@ -106,8 +113,13 @@ UserCRUD.prototype = {
     },
     async createUsersDataset() {
         const allUsers = await this.getAllUsers();
-        allUsers.forEach((user) => this.users.set(user.id, new User(user)));
-        console.log(this.users);
+
+        for (let i = 0; i < allUsers.length; i++) {
+            const user = allUsers[i];
+            const newUser = new User(user);
+            await newUser.getUserInfoData();
+            this.users.set(user.id, newUser);
+        }
     },
     sortUsers(sortBy) {
         let sortFunction;
@@ -281,7 +293,7 @@ const createTableRow = (user) => {
     const td = document.createElement('td');
     td.innerHTML = user.id;
     tr.appendChild(td);
-
+    console.log(user);
     createTd(user.firstName, 'firstName');
     createTd(user.lastName, 'lastName');
     createTd(user.capsule, 'capsule');
@@ -302,11 +314,13 @@ const createTableRow = (user) => {
 
 
 const addUsersToTable = (usersInDisplay) => {
+    console.log(usersInDisplay);
     table.innerHTML = '';
-    usersInDisplay.forEach((user) => {
-        const tr = createTableRow(user);
+
+    for (let i = 0; i < usersInDisplay.length; i++) {
+        const tr = createTableRow(usersInDisplay[i]);
         table.appendChild(tr);
-    });
+    }
 }
 
 const setToolbar = () => {
@@ -337,9 +351,7 @@ const setFilterListeners = () => {
 
 const init = async () => {
     await usersCrud.createUsersDataset();
-    setTimeout(() => {
-        addUsersToTable(usersCrud.sortUsers(state.currentFilter));
-    }, 4000);
+    addUsersToTable(usersCrud.sortUsers(state.currentFilter));
     setToolbar();
     setFilterListeners();
 }

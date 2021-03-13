@@ -149,3 +149,33 @@ td input{
     border:none;
     background-color: transparent;
 }
+
+.display--hide{
+    display:none !important;;
+}
+.spinner{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+}
+
+.spinner .spinnerCircle{
+    height: 30px;
+    width: 30px;
+    border: rosybrown solid 2px;
+    border-width: 2px 2px 2px 0;
+    border-color:  transparent;
+    border-top-color: rosybrown;
+    border-radius: 50%;
+    animation: spin 800ms linear 1200ms infinite forwards ;
+}
+
+@keyframes spin{
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+}
