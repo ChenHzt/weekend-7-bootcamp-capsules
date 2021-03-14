@@ -146,9 +146,11 @@ th[data-filter='false']{
 td input{
     display: block;
     width: 100%;
-    border:none;
-    background-color: transparent;
+    border:black 1px solid;
+    background-color: white;
 }
+
+
 
 .display--hide{
     display:none !important;;
