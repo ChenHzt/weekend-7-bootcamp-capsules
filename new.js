@@ -49,6 +49,10 @@ function User(argsmap) {
     this.firstName = argsmap.firstName;
     this.lastName = argsmap.lastName;
     this.capsule = argsmap.capsule;
+    this.age = argsmap.age;
+    this.hobby = argsmap.hobby;
+    this.city = argsmap.city;
+    this.gender = argsmap.gender;
 
 }
 
@@ -105,9 +109,15 @@ User.prototype = {
 
 function UserCRUD() {
     this.users = new Map();
+  
 }
 
 UserCRUD.prototype = {
+    async getDataFromLocalStorage(){
+        let temp = JSON.parse(localStorage.getItem('allUsers'));
+        temp = temp.map((elem) => [elem[0], new User(elem[1])]);
+        this.users = new Map(temp);
+    },
     async getAllUsers() {
         return await apiHandler.getDataFromApi();
     },
@@ -350,7 +360,13 @@ const setFilterListeners = () => {
 }
 
 const init = async () => {
-    await usersCrud.createUsersDataset();
+    if (localStorage.getItem('allUsers') === null || localStorage.getItem('allUsers') === []) {
+        await usersCrud.createUsersDataset();
+        localStorage.setItem('allUsers', JSON.stringify([...usersCrud.users]));
+    }
+    else {
+        usersCrud.getDataFromLocalStorage();
+    }
     addUsersToTable(usersCrud.sortUsers(state.currentFilter));
     setToolbar();
     setFilterListeners();

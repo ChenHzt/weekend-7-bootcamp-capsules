@@ -194,3 +194,13 @@ td input{
         transform:rotate(360deg);
     }
 }
+
+.refresh-btn{
+    border: none;
+    cursor: pointer;
+    margin-left:10px;
+    background-color: transparent;
+    color:white;
+    outline: none;
+    font-size: 1.5rem;
+}
