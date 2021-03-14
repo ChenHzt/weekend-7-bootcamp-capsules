@@ -368,7 +368,7 @@ AppUi.prototype = {
         tableHeaders.forEach((header) => {
             header.addEventListener('click', (event) => {
                 state.currentFilter = event.target.getAttribute('data-column')
-                addUsersToTable(usersCrud.sortUsers(state.currentFilter));
+                AppUi.prototype.addUsersToTable(usersCrud.sortUsers(state.currentFilter));
                 tableHeaders.forEach((h) => h.setAttribute('data-filter', 'false'));
                 event.target.setAttribute('data-filter', 'true');
             })
