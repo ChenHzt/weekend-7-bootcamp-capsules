@@ -123,6 +123,14 @@ table.table td a {
     box-shadow: 0px 15px 20px rgba(249,229,157, 0.4);
 }
 
+.btn[data-btn-type='cancel']:hover{
+    box-shadow: 0px 15px 20px rgba(98,190,181, 0.4);
+}
+
+.btn[data-btn-type='confirm']:hover{
+    box-shadow: 0px 15px 20px rgba(76,130,175, 0.4);
+}
+
 .btn[data-active='true']{
     display: initial;
 }
@@ -137,8 +145,14 @@ i{
 }
 
 th[data-filter='true']{
-    color:blue
+    color:blue;
+    position: relative;
 }
+th[data-filter='true']::after{
+    content: '⇓';
+    color:blue;
+}
+
 th[data-filter='false']{
     color: black;
 }
@@ -149,7 +163,6 @@ td input{
     border:black 1px solid;
     background-color: white;
 }
-
 
 
 .display--hide{
